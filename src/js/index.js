@@ -39,8 +39,9 @@ function onLoadMore() {
 }
 
 
-function appendGalleryMarkup(arr) {
-    const markup = arr.map(item => markupTemplate(item)).join('');
+function appendGalleryMarkup(images) {
+    console.log(images, 'images');
+    const markup = markupTemplate(images);
     refs.gallery.insertAdjacentHTML('beforeend', markup);
 }
 

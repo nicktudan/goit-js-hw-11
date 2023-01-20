@@ -1,4 +1,4 @@
-export function markupTemplate({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) {
+export function markupTemplate({ largeImageURL, webformatURL, tags, likes, views, comments, downloads }) {
     return `<div class="photo-card">
     <a href="${largeImageURL}" target="_blank" rel="noopener noreferrer">
         <img src="${webformatURL}" alt="${tags}" title="${tags}" loading="lazy" />
