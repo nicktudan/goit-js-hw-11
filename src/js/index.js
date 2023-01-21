@@ -43,8 +43,14 @@ function fetchImages() {
     loadMoreBtn.disable();
 
     newsApiService.fetchImages().then(foundData => {
-        newsApiService.totalPage = Math.ceil(foundData.total / newsApiService.perPage);
+        newsApiService.totalPage = Math.ceil(foundData.totalHits / newsApiService.perPage);
         newsApiService.loadedNow += foundData.hits.length;
+        
+        if (foundData.hits.length === 0) {
+            loadMoreBtn.hide();
+            Notify.failure('Sorry, there are no images matching your search query. Please try again.');
+            return;
+        }
 
         if (newsApiService.page === 2) {
             Notify.success(`Hooray! We found ${foundData.totalHits} images.`);
@@ -52,17 +58,14 @@ function fetchImages() {
 
         if (newsApiService.totalPage + 1 === newsApiService.page) {
             loadMoreBtn.hide();
-        }
-
-        if (foundData.hits.length === 0) {
-            Notify.failure('Sorry, there are no images matching your search query. Please try again.');
-            return;
+            Notify.info('We are sorry, but you have reached the end of search results.');
         }
 
         Notify.success(`Loaded ${newsApiService.loadedNow} images.`);
 
         appendGalleryMarkup(foundData.hits);
         loadMoreBtn.enable();
+        lightbox.refresh();
     });
 }
 
@@ -71,7 +74,6 @@ function appendGalleryMarkup(images) {
     const markup = images.map(markupTemplate).join('');
     // const markup = markupTemplate(images);
     refs.gallery.insertAdjacentHTML('beforeend', markup);
-    // refs.gallery.insertAdjacentHTML('beforeend', markupTemplate(images));
     smoothScroll()
 }
 
@@ -89,6 +91,12 @@ function smoothScroll() {
         behavior: "smooth",
     });
 }
+
+let lightbox = new SimpleLightbox('.gallery a', {
+    captions: false,
+    doubleTapZoom: false,
+    scrollZoom: false,
+});
 
 
 
