@@ -3,6 +3,8 @@ import NewsApiService from './fetchImages';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { markupTemplate } from './markupTemplate';
 import LoadMoreBtn from './load-more-btn';
+import SimpleLightbox from "simplelightbox";
+import "simplelightbox/dist/simple-lightbox.min.css";
 
 
 const refs = {
@@ -70,11 +72,25 @@ function appendGalleryMarkup(images) {
     // const markup = markupTemplate(images);
     refs.gallery.insertAdjacentHTML('beforeend', markup);
     // refs.gallery.insertAdjacentHTML('beforeend', markupTemplate(images));
+    smoothScroll()
 }
 
 function cleanGallery() {
     refs.gallery.innerHTML = '';
 }
+
+function smoothScroll() {
+    const { height: cardHeight } = document
+        .querySelector(".gallery")
+        .firstElementChild.getBoundingClientRect();
+
+    window.scrollBy({
+        top: cardHeight * 2,
+        behavior: "smooth",
+    });
+}
+
+
 
 // 1. У відповіді бекенд повертає властивість
 // totalHits - загальна кількість зображень,
