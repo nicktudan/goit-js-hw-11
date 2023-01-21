@@ -19,8 +19,6 @@ const loadMoreBtn = new LoadMoreBtn({
     hidden: true,
 });
 
-// console.log(loadMoreBtn);
-
 refs.searchForm.addEventListener('submit', onSearch);
 loadMoreBtn.refs.button.addEventListener('click', fetchImages);
 
@@ -29,7 +27,7 @@ function onSearch(e) {
     cleanGallery();
     newsApiService.searchQuery = e.currentTarget.elements.searchQuery.value.trim();
 
-    if (newsApiService.searchQuery === '') {
+    if (!newsApiService.searchQuery) {
         Notify.failure('Please, enter text!');
         return;
     }
@@ -39,40 +37,70 @@ function onSearch(e) {
     fetchImages();
 }
 
-function fetchImages() {
+async function fetchImages() {
     loadMoreBtn.disable();
 
-    newsApiService.fetchImages().then(foundData => {
+    // newsApiService.fetchImages().then(foundData => {
+    //     newsApiService.totalPage = Math.ceil(foundData.totalHits / newsApiService.perPage);
+    //     newsApiService.loadedNow += foundData.hits.length;
+        
+    //     if (foundData.hits.length === 0) {
+    //         loadMoreBtn.hide();
+    //         Notify.failure('Sorry, there are no images matching your search query. Please try again.');
+    //         return;
+    //     }
+
+    //     if (newsApiService.page === 2) {
+    //         Notify.success(`Hooray! We found ${foundData.totalHits} images.`);
+    //     }
+
+    //     if (newsApiService.totalPage + 1 === newsApiService.page) {
+    //         loadMoreBtn.hide();
+    //         Notify.info('We are sorry, but you have reached the end of search results.');
+    //     }
+
+    //     Notify.success(`Loaded ${newsApiService.loadedNow} images.`);
+
+    //     appendGalleryMarkup(foundData.hits);
+    //     loadMoreBtn.enable();
+    //     lightbox.refresh();
+    // });
+
+    const response1 = await newsApiService.fetchImages();
+    const foundData = await foundData => {
         newsApiService.totalPage = Math.ceil(foundData.totalHits / newsApiService.perPage);
         newsApiService.loadedNow += foundData.hits.length;
-        
-        if (foundData.hits.length === 0) {
-            loadMoreBtn.hide();
-            Notify.failure('Sorry, there are no images matching your search query. Please try again.');
-            return;
+
+        try {
+            if (foundData.hits.length === 0) {
+                loadMoreBtn.hide();
+                Notify.failure('Sorry, there are no images matching your search query. Please try again.');
+                return;
+            }
+
+            if (newsApiService.page === 2) {
+                Notify.success(`Hooray! We found ${foundData.totalHits} images.`);
+            }   
+
+            if (newsApiService.totalPage + 1 === newsApiService.page) {
+                loadMoreBtn.hide();
+                Notify.info('We are sorry, but you have reached the end of search results.');
+            }
+
+            Notify.success(`Loaded ${newsApiService.loadedNow} images.`);
+
+            appendGalleryMarkup(foundData.hits);
+            loadMoreBtn.enable();
+            lightbox.refresh();
+        } catch (error) {
+            Notify.failure('Oops, the transaction error occurred. Please try again later.');
         }
-
-        if (newsApiService.page === 2) {
-            Notify.success(`Hooray! We found ${foundData.totalHits} images.`);
-        }
-
-        if (newsApiService.totalPage + 1 === newsApiService.page) {
-            loadMoreBtn.hide();
-            Notify.info('We are sorry, but you have reached the end of search results.');
-        }
-
-        Notify.success(`Loaded ${newsApiService.loadedNow} images.`);
-
-        appendGalleryMarkup(foundData.hits);
-        loadMoreBtn.enable();
-        lightbox.refresh();
-    });
+    }
 }
 
 function appendGalleryMarkup(images) {
     console.log(images, 'images');
     const markup = images.map(markupTemplate).join('');
-    // const markup = markupTemplate(images);
     refs.gallery.insertAdjacentHTML('beforeend', markup);
     smoothScroll()
 }
@@ -97,24 +125,3 @@ let lightbox = new SimpleLightbox('.gallery a', {
     doubleTapZoom: false,
     scrollZoom: false,
 });
-
-
-
-// 1. У відповіді бекенд повертає властивість
-// totalHits - загальна кількість зображень,
-//     які відповідають критерію пошуку(для безкоштовного акаунту).
-// Якщо користувач дійшов до кінця колекції, ховай кнопку
-// і виводь повідомлення з текстом
-// "We're sorry, but you've reached the end of search results."
-
-// 2. Після першого запиту з кожним новим пошуком отримувати
-// повідомлення, в якому буде написано, скільки всього 
-// знайшли зображень(властивість totalHits).Текст повідомлення
-//     - "Hooray! We found totalHits images."
-
-// 3. Якщо бекенд повертає порожній масив, значить нічого
-//  підходящого не було знайдено.У такому разі показуй 
-//  повідомлення з текстом
-// "Sorry, there are no images matching your search query. 
-// Please try again."
-// Для повідомлень використовуй бібліотеку notiflix.
