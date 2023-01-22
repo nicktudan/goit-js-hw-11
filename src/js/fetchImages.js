@@ -13,16 +13,16 @@ export default class NewsApiService {
     }
 
     async fetchImages() {
-        const filters = `?key=${API_KEY}&q=${this.searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&per_page=${this.perPage}&page=${this.page}`;
-        this.incrementPage();
-        this.resetLoaded();
+        try {
+            const filters = `?key=${API_KEY}&q=${this.searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&per_page=${this.perPage}&page=${this.page}`;
+            this.incrementPage();
+            this.resetLoaded();
 
-        // if (!filters.ok) {
-        //     throw new Error(filters.statusText);
-        // } 
-
-        const response = await axios.get(filters);
-        return response.data;
+            const response = await axios.get(filters);
+            return response.data;
+        } catch (error) {
+            throw new Error(error);
+        }
     }
     
 

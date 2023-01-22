@@ -40,63 +40,36 @@ function onSearch(e) {
 async function fetchImages() {
     loadMoreBtn.disable();
 
-    newsApiService.fetchImages().then(foundData => {
-        newsApiService.totalPage = Math.ceil(foundData.totalHits / newsApiService.perPage);
-        newsApiService.loadedNow += foundData.hits.length;
-        
-        if (foundData.hits.length === 0) {
-            loadMoreBtn.hide();
-            Notify.failure('Sorry, there are no images matching your search query. Please try again.');
-            return;
+        try {            
+            const foundData = await newsApiService.fetchImages();
+            newsApiService.totalPage = Math.ceil(foundData.totalHits / newsApiService.perPage);
+            newsApiService.loadedNow += foundData.hits.length;
+
+            if (foundData.hits.length === 0) {
+                loadMoreBtn.hide();
+                Notify.failure('Sorry, there are no images matching your search query. Please try again.');
+                return;
+            }
+
+            if (newsApiService.page === 2) {
+                Notify.success(`Hooray! We found ${foundData.totalHits} images.`);
+            }
+
+            if (newsApiService.totalPage + 1 === newsApiService.page) {
+                loadMoreBtn.hide();
+                Notify.info('We are sorry, but you have reached the end of search results.');
+            }
+
+            Notify.success(`Loaded ${newsApiService.loadedNow} images.`);
+
+            appendGalleryMarkup(foundData.hits);
+            loadMoreBtn.enable();
+            lightbox.refresh();
+        } catch (error) {
+            Notify.failure('Oops, the transaction error occurred. Please try again later.');
+            console.log(error.message);
         }
-
-        if (newsApiService.page === 2) {
-            Notify.success(`Hooray! We found ${foundData.totalHits} images.`);
-        }
-
-        if (newsApiService.totalPage + 1 === newsApiService.page) {
-            loadMoreBtn.hide();
-            Notify.info('We are sorry, but you have reached the end of search results.');
-        }
-
-        Notify.success(`Loaded ${newsApiService.loadedNow} images.`);
-
-        appendGalleryMarkup(foundData.hits);
-        loadMoreBtn.enable();
-        lightbox.refresh();
-    });
-
-    // const response1 = await newsApiService.fetchImages();
-    // const foundData = await foundData => {
-    //     newsApiService.totalPage = Math.ceil(foundData.totalHits / newsApiService.perPage);
-    //     newsApiService.loadedNow += foundData.hits.length;
-
-    //     try {
-    //         if (foundData.hits.length === 0) {
-    //             loadMoreBtn.hide();
-    //             Notify.failure('Sorry, there are no images matching your search query. Please try again.');
-    //             return;
-    //         }
-
-    //         if (newsApiService.page === 2) {
-    //             Notify.success(`Hooray! We found ${foundData.totalHits} images.`);
-    //         }   
-
-    //         if (newsApiService.totalPage + 1 === newsApiService.page) {
-    //             loadMoreBtn.hide();
-    //             Notify.info('We are sorry, but you have reached the end of search results.');
-    //         }
-
-    //         Notify.success(`Loaded ${newsApiService.loadedNow} images.`);
-
-    //         appendGalleryMarkup(foundData.hits);
-    //         loadMoreBtn.enable();
-    //         lightbox.refresh();
-    //     } catch (error) {
-    //         Notify.failure('Oops, the transaction error occurred. Please try again later.');
-    //     }
     }
-
 
 function appendGalleryMarkup(images) {
     console.log(images, 'images');
